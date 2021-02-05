@@ -50,6 +50,6 @@ export const DivButton = styled.div`
     &:hover {
         transition: all 0.2s ease-in-out;
         scale: 1.1;
-        background: ${colors.buttonHover};
+        background:${({isEnabled}) => (isEnabled ?  colors.buttonHover : colors.disabled)};
     }
 `

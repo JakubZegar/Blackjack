@@ -22,6 +22,7 @@ function Game(loadSavedGame) {
     const [croupierOptionalPoints, setCroupierOptionalPoints] = useState(0);
     const [showCroupierOptionalPoints, setShowCroupierOptionalPoints] = useState(false);
 
+    const [enableDrawingCardsForPlayer, setEnableDrawingCardsForPlayer] = useState(true);
 
     const [playerCurrentBalance, setPlayerCurrentBalance] = useState(1000);
     const [currentBet, setCurrentBet] = useState(0);
@@ -96,6 +97,12 @@ function Game(loadSavedGame) {
         }
     }, [croupierHand])
 
+    useEffect(() => {
+        if (playerPoints >= 21 && playerOptionalPoints >= 21) {
+            setEnableDrawingCardsForPlayer(() => {return false})
+        }
+    }, [playerPoints])
+
     const createNewDeck = async () => {
         fetch(mainLink + newDeckShuffledLink + decksCount, {
             method: 'GET',
@@ -155,7 +162,9 @@ function Game(loadSavedGame) {
                                 </PointsValue>
                             </PointsContainer>
                             <ActionButtonContainer>
-                                <DivButton smallMargin={true} onClick={() => draw(true, drawOneCardLink)}>Hit</DivButton>
+                                <DivButton smallMargin={true} isEnabled={enableDrawingCardsForPlayer} onClick={() => {
+                                    enableDrawingCardsForPlayer === true && draw(true, drawOneCardLink)
+                                }}>Hit</DivButton>
                                 <DivButton smallMargin={true}>Stand</DivButton>
                                 <DivButton smallMargin={true}>Double</DivButton>
                                 <DivButton smallMargin={true}>Bet</DivButton>
