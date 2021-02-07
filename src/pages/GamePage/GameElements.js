@@ -11,7 +11,7 @@ export const GameScreenContainer = styled.div`
 
 export const HandsContainer = styled.div`
     display:flex;
-    flex:5;
+    flex:3;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
@@ -66,10 +66,10 @@ export const PointsValue = styled.div`
 
 export const BalanceContainer = styled.div`
     display:flex;
+    flex: 1;
     flex-direction:column;
     align-items:center;
     justify-content:flex-end;
-    flex:1;
 `
 
 export const Balance = styled.div`
@@ -81,7 +81,6 @@ export const Balance = styled.div`
     border: 8px solid black;
     width: 120px;
     margin: 3px 0 3px 0;
-
 `
 
 export const BalanceText = styled.h4`
@@ -92,12 +91,6 @@ export const BalanceText = styled.h4`
 export const BetText = styled.h5`
     color:white;
     text-align:center;
-`
-
-export const OptionsContainer = styled.div`
-    display:flex;
-    flex:1;
-    justify-content:flex-start;
 `
 
 export const BetCoin = styled.div`
@@ -126,3 +119,20 @@ export const BetConiText = styled.h3`
 export const Message = styled.h2`
     color:white;
 `
+export const OptionsContainer = styled.div`
+    display:flex;
+    flex:1;
+    flex-direction: column;
+    align-self: stretch;
+    align-items: space-between;
+    justify-content:space-between;
+    padding: 16px;
+`
+
+export const HistoryContainer = styled.div`
+    display: flex;
+    align-items: stretch;
+    flex-direction: column;
+    justify-content:center;
+`
+

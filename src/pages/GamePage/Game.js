@@ -1,9 +1,10 @@
 import React,{useState, useEffect} from 'react'
 import Spinner from '../../components/Spinner'
 import {mainLink, newDeckShuffledLink, drawOneCardLink, drawTwoCardsLink, decksCount, reshuffleDeckLink} from '../../assets/const'
-import { ActionButtonContainer, Balance, BalanceContainer, Message, BalanceText,BetCoin,BetConiText,BetText, CroupierHandContainer,GameScreenContainer, HandsContainer, OptionsContainer, PointsContainer, PointsValue, UserHandContainer } from './GameElements';
+import { ActionButtonContainer, Balance, BalanceContainer, Message, BalanceText,BetCoin,BetConiText,BetText, CroupierHandContainer,GameScreenContainer, HandsContainer, OptionsContainer, PointsContainer, PointsValue, UserHandContainer, HistoryContainer } from './GameElements';
 import CroupierHand from './CroupierHand';
 import PlayerHand from './PlayerHand';
+import History from './History';
 import { DivButton } from '../../components/Button'
 
 function Game() {
@@ -12,6 +13,8 @@ function Game() {
 
     const [playerHand, setPlayerHand] = useState([]);
     const [croupierHand, setCroupierHand] = useState([]);
+
+    const [gameHistory, setGameHistory] = useState([]);
 
     const [playerPoints, setPlayerPoints] = useState(0);
     const [croupierPoints, setCroupierPoints] = useState(0);
@@ -134,9 +137,6 @@ function Game() {
         } else if (playerRoundEnded === true && croupierPoints !== 0) {
             let compareUserPoints;
             let compareCroupierPoints;
-            // if( playerPoints >= 21) {
-            //     compareUserPoints = playerPoints;
-            // } else 
             if (playerPoints > 21 && (playerOptionalPoints > 0 && playerOptionalPoints <= 21) ) {
                 compareUserPoints = playerOptionalPoints;
             } else {
@@ -155,17 +155,17 @@ function Game() {
                 setMessage("You won")
                 setTimeout(() => {
                     playerWon();
-                }, 1500);
+                }, 2000);
             } else if ((21 - compareUserPoints) > (21 - compareCroupierPoints)){
                 setMessage("Computer won")
                 setTimeout(() => {
                     computerWon();
-                }, 1500);
+                }, 2000);
             } else {
                 setMessage("Draw")
                 setTimeout(() => {
                     noWinner();
-                }, 1500);
+                }, 2000);
             }
         }
     }, [croupierPoints])
@@ -180,10 +180,14 @@ function Game() {
     useEffect(() => {
         if ( roundCounter > 5 ) {
             endGame();
-        } else {
+        } else if (roundCounter !== 1) {
             nextRound();
         }
     }, [roundCounter])
+
+    useEffect(() => {
+        console.log(gameHistory)
+    }, [gameHistory])
 
     const createNewDeck = () => {
         fetch(mainLink + newDeckShuffledLink + decksCount, {
@@ -261,20 +265,30 @@ function Game() {
     }
 
     const playerWon = () => {
+        setGameHistory((history) => {
+            return [...history, [playerHand, croupierHand]]
+        })
         setPlayerCurrentBalance((balance) => {return balance + (currentBet * 1.5)})
         setRoundCounter((round) => {return round + 1});
     }
 
     const computerWon = () => {
+        setGameHistory((history) => {
+            return [...history, [playerHand, croupierHand]]
+        })
         setRoundCounter((round) => {return round + 1});
     }
 
     const noWinner = () => {
+        setGameHistory((history) => {
+            return [...history, [playerHand, croupierHand]]
+        })
         setPlayerCurrentBalance((balance) => {return balance + currentBet})
         setRoundCounter((round) => {return round + 1});
     }
 
     const nextRound = () => {
+        setReverseCroupierCard(false);
         setGoingForDouble(false);
         setShowCroupierOptionalPoints(false);
         setShowPlayerOptionalPoints(false);
@@ -369,7 +383,11 @@ function Game() {
                             </UserHandContainer>
                         </HandsContainer>
                         <OptionsContainer>
-                            <DivButton>Save progress</DivButton>
+                            <HistoryContainer>
+                                <History history={gameHistory}/>
+                            </HistoryContainer>
+
+                            {/* <DivButton>Save progress</DivButton> */}
                         </OptionsContainer>
                     </>
                 ) 
