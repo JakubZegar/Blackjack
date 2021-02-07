@@ -1,8 +1,17 @@
 import styled from 'styled-components';
 import {colors} from '../../assets/colors'
 
+export const GameScreenContainer = styled.div`
+    display:flex;
+    flex:1;
+    flex-direction:row;
+    align-items:center;
+    justify-content:space-around;
+`
+
 export const HandsContainer = styled.div`
     display:flex;
+    flex:5;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
@@ -53,4 +62,67 @@ export const PointsValue = styled.div`
     color: white;
     text-align: center;
     font-weight: bold;
+`
+
+export const BalanceContainer = styled.div`
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-end;
+    flex:1;
+`
+
+export const Balance = styled.div`
+    background-color: ${colors.buttonHover};
+    border-radius:50%;
+    padding: 24px;
+    align-items:center;
+    justify-content:center;
+    border: 8px solid black;
+    width: 120px;
+    margin: 3px 0 3px 0;
+
+`
+
+export const BalanceText = styled.h4`
+    color:white;
+    text-align:center;
+`
+
+export const BetText = styled.h5`
+    color:white;
+    text-align:center;
+`
+
+export const OptionsContainer = styled.div`
+    display:flex;
+    flex:1;
+    justify-content:flex-start;
+`
+
+export const BetCoin = styled.div`
+    display: flex;
+    width:50px;
+    height: 50px;
+    background-color: ${colors.buttonPrimary};
+    border: 8px solid black;
+    border-radius: 50%;
+    margin: 1px;
+    align-items:center;
+    justify-content:center;
+    cursor: pointer;
+
+    &:hover {
+        transition: all 0.2s ease-in-out;
+        background: ${({enabled}) => (enabled ? colors.disabled : colors.buttonHover)};
+    }
+`
+
+export const BetConiText = styled.h3`
+    color:white;
+    text-align:center;
+`
+
+export const Message = styled.h2`
+    color:white;
 `

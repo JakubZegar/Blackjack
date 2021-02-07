@@ -2,24 +2,23 @@ import React,{useState, useEffect} from 'react'
 import {Card} from '../../components/Card';
 import ReversableCard from '../../components/ReversableCard';
 
-function CroupierHand(currentHand) {
+function CroupierHand({currentHand, isReversed}) {
 
     useEffect(() => {
-        console.log("Długość: ", currentHand.currentHand.length);
-
         console.log("Przekazana ręka: ", currentHand);
+        console.log("długość: ", isReversed);
     }, [currentHand])
 
     return (
         <>
             {
-                currentHand.currentHand.length === 2 ? (
+                currentHand.length === 2 ? (
                     <>
-                        <Card aversImage={currentHand.currentHand[0].image}/>
-                        <ReversableCard aversImage={currentHand.currentHand[1].image} />
+                        <Card aversImage={currentHand[0].image}/>
+                        <ReversableCard aversImage={currentHand[1].image} isReversed={isReversed}/>
                     </>
                 ) : (
-                    currentHand.currentHand.map((card) => (
+                    currentHand.map((card) => (
                         <Card aversImage={card.image}/>
                     ))
                 )

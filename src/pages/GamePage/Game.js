@@ -1,12 +1,12 @@
 import React,{useState, useEffect} from 'react'
 import Spinner from '../../components/Spinner'
 import {mainLink, newDeckShuffledLink, drawOneCardLink, drawTwoCardsLink, decksCount, reshuffleDeckLink} from '../../assets/const'
-import { ActionButtonContainer, CroupierHandContainer, HandsContainer, PointsContainer, PointsValue, UserHandContainer } from './GameElements';
+import { ActionButtonContainer, Balance, BalanceContainer, Message, BalanceText,BetCoin,BetConiText,BetText, CroupierHandContainer,GameScreenContainer, HandsContainer, OptionsContainer, PointsContainer, PointsValue, UserHandContainer } from './GameElements';
 import CroupierHand from './CroupierHand';
 import PlayerHand from './PlayerHand';
 import { DivButton } from '../../components/Button'
 
-function Game(loadSavedGame) {
+function Game() {
     const [isDeckLoaded, setIsDeckLoaded] = useState(false);
     const [deck, setDeck] = useState({});
 
@@ -23,25 +23,36 @@ function Game(loadSavedGame) {
     const [showCroupierOptionalPoints, setShowCroupierOptionalPoints] = useState(false);
 
     const [enableDrawingCardsForPlayer, setEnableDrawingCardsForPlayer] = useState(true);
+    const [playerRoundEnded, setPlayerRoundEnded] = useState(false);
 
     const [playerCurrentBalance, setPlayerCurrentBalance] = useState(1000);
     const [currentBet, setCurrentBet] = useState(0);
 
+    const [reverseCroupierCard, setReverseCroupierCard] = useState(false);
+
+    const [roundCounter, setRoundCounter] = useState(1);
+
+    const [placeBet, setPlaceBet] = useState(true);
+
+    const [message, setMessage] = useState("Place your bet");
+    const [showBetButton, setShowBetButton] = useState(true);
+
+    const [goingForDouble, setGoingForDouble] = useState(false);
+
+    let enableHitButton = enableDrawingCardsForPlayer === true && playerRoundEnded === false && placeBet === false;
+    let enableStandButton = playerRoundEnded === false && enableDrawingCardsForPlayer === true && placeBet === false;
+    let enableDoubleButton = playerHand.length === 2 && playerRoundEnded === false && placeBet === false && playerCurrentBalance >= currentBet;
+
     useEffect(() => {
         createNewDeck();
-        console.log("Jestem w pierwszym useEffect");
         return () => {
             //Save current progress
         }
     }, [])
 
-    useEffect(() => {
-        if (isDeckLoaded === true) {
-            console.log("Talia: ", deck);
-            draw(true, drawTwoCardsLink);
-            draw(false, drawTwoCardsLink);
-        }
-    }, [deck])
+    // useEffect(() => {
+
+    // }, [deck])
 
     useEffect(() => {
         setPlayerPoints(() => {return 0})
@@ -67,7 +78,7 @@ function Game(loadSavedGame) {
         setCroupierPoints(() => {return 0})
         setCroupierOptionalPoints(() => {return 0})
 
-        if (croupierHand.length === 2) {
+        if (croupierHand.length === 2 && playerRoundEnded === false) {
             if(croupierHand[0].value === "JACK" || croupierHand[0].value === "KING" || croupierHand[0].value === "QUEEN" ) {
                 setCroupierPoints((points) => { return points + 10 })
                 setCroupierOptionalPoints((points) => { return points + 10 }) 
@@ -95,15 +106,86 @@ function Game(loadSavedGame) {
                 )
             ))
         }
-    }, [croupierHand])
+    }, [croupierHand, playerRoundEnded])
 
     useEffect(() => {
+        
         if (playerPoints >= 21 && playerOptionalPoints >= 21) {
             setEnableDrawingCardsForPlayer(() => {return false})
+            setMessage("You lost");
+            setTimeout(() => {
+                computerWon();
+            }, 2000);
+        } else if (playerPoints === 21 || playerOptionalPoints === 21) {
+            setMessage("Blackjack!")
+            setEnableDrawingCardsForPlayer(() => {return false})
+            setTimeout(() => {
+                stand()
+            }, 2000);
+        } else {
+            goingForDouble === true && stand();
         }
     }, [playerPoints])
 
-    const createNewDeck = async () => {
+    useEffect(() => {
+        if ( ((playerRoundEnded === true && croupierPoints <= 16) || (croupierPoints > 21 && croupierOptionalPoints <= 16)) && croupierPoints !== 0) {
+            setMessage("Computers turn");
+            draw(false, drawOneCardLink);
+        } else if (playerRoundEnded === true && croupierPoints !== 0) {
+            let compareUserPoints;
+            let compareCroupierPoints;
+            // if( playerPoints >= 21) {
+            //     compareUserPoints = playerPoints;
+            // } else 
+            if (playerPoints > 21 && (playerOptionalPoints > 0 && playerOptionalPoints <= 21) ) {
+                compareUserPoints = playerOptionalPoints;
+            } else {
+                compareUserPoints = playerPoints;
+            }
+
+            if( croupierPoints > 21 && croupierOptionalPoints > 21){
+                compareCroupierPoints = 0;
+            } else if (croupierPoints > 21 && (croupierOptionalPoints > 0 && croupierOptionalPoints <= 21)) {
+                compareCroupierPoints = croupierOptionalPoints;
+            } else if (croupierPoints <= 21) {
+                compareCroupierPoints = croupierPoints;
+            }
+
+            if( (21 - compareUserPoints) < (21 - compareCroupierPoints) ) {
+                setMessage("You won")
+                setTimeout(() => {
+                    playerWon();
+                }, 1500);
+            } else if ((21 - compareUserPoints) > (21 - compareCroupierPoints)){
+                setMessage("Computer won")
+                setTimeout(() => {
+                    computerWon();
+                }, 1500);
+            } else {
+                setMessage("Draw")
+                setTimeout(() => {
+                    noWinner();
+                }, 1500);
+            }
+        }
+    }, [croupierPoints])
+
+    useEffect(() => {
+        if (placeBet === true) {
+            setMessage("Place your bet");
+            setShowBetButton(true);
+        }
+    }, [placeBet])
+
+    useEffect(() => {
+        if ( roundCounter > 5 ) {
+            endGame();
+        } else {
+            nextRound();
+        }
+    }, [roundCounter])
+
+    const createNewDeck = () => {
         fetch(mainLink + newDeckShuffledLink + decksCount, {
             method: 'GET',
             headers: {
@@ -121,7 +203,7 @@ function Game(loadSavedGame) {
             });    
     }
 
-    const draw = async (forUser, howManyCards) => {
+    const draw = (forUser, howManyCards) => {
         fetch(mainLink + deck.deck_id + howManyCards, {
             method: 'GET',
             headers: {
@@ -136,21 +218,117 @@ function Game(loadSavedGame) {
                 } else {
                     setCroupierHand((currentCroupierHand) => { return [...currentCroupierHand, ...responseData.cards]; })
                 }
+
             })
             .catch(err => {
               console.log('error : ' + err);
             });    
     }
 
+    const stand = () => {
+        setReverseCroupierCard(() => {return true})
+        setTimeout(() => {
+            setPlayerRoundEnded(() => {return true})
+            setEnableDrawingCardsForPlayer(() => {return false})    
+        }, 250);
+    }
+
+    const double = () => {
+        setGoingForDouble(true);
+        setMessage("Going for double!")
+        setPlayerCurrentBalance((balance) => {return balance - currentBet})
+        setCurrentBet((bet) => {return bet+bet})
+        draw(true, drawOneCardLink);
+    }
+
+    const startRound = () => {
+        setPlayerRoundEnded(false);
+        setEnableDrawingCardsForPlayer(true);
+        setPlaceBet(false);
+        setShowBetButton(false);
+        setMessage("Your turn");
+        if (isDeckLoaded === true) {
+            draw(true, drawTwoCardsLink);
+            draw(false, drawTwoCardsLink);
+        }
+    }
+
+    const bet = (amount) => {
+        if (playerCurrentBalance - amount >= 0) {
+            setPlayerCurrentBalance((balance) => { return balance - amount});
+            setCurrentBet((bet) => {return bet + amount})
+        }
+    }
+
+    const playerWon = () => {
+        setPlayerCurrentBalance((balance) => {return balance + (currentBet * 1.5)})
+        setRoundCounter((round) => {return round + 1});
+    }
+
+    const computerWon = () => {
+        setRoundCounter((round) => {return round + 1});
+    }
+
+    const noWinner = () => {
+        setPlayerCurrentBalance((balance) => {return balance + currentBet})
+        setRoundCounter((round) => {return round + 1});
+    }
+
+    const nextRound = () => {
+        setGoingForDouble(false);
+        setShowCroupierOptionalPoints(false);
+        setShowPlayerOptionalPoints(false);
+        setPlayerPoints(0);
+        setPlayerOptionalPoints(0);
+        setCroupierPoints(0);
+        setCroupierOptionalPoints(0);
+        setPlaceBet(true);
+        setShowBetButton(true);
+        setCurrentBet(0);
+        setPlayerHand([]);
+        setCroupierHand([]);
+    } 
+
+    const endGame = () => {
+        setMessage("End of game")
+    }
+
     return (
-        <>
+        <GameScreenContainer>
             {
                 isDeckLoaded === true ? (
                     <>
+                        <BalanceContainer>
+                            <Balance>
+                                <BalanceText>
+                                    Balance: {playerCurrentBalance}
+                                </BalanceText>
+                            </Balance>
+                            
+                            <BetCoin enabled={!placeBet} onClick={() => placeBet && bet(10)}>
+                                <BetConiText>10</BetConiText>
+                            </BetCoin>
+                            <BetCoin enabled={!placeBet} onClick={() => placeBet && bet(50)}>
+                                <BetConiText>50</BetConiText>
+                            </BetCoin>
+                            <BetCoin enabled={!placeBet} onClick={() => placeBet && bet(100)}>
+                                <BetConiText>100</BetConiText>
+                            </BetCoin>
+                            <BetCoin enabled={!placeBet} onClick={() => placeBet && bet(500)}>
+                                <BetConiText>500</BetConiText>
+                            </BetCoin>
+
+                            <Balance>
+                                <BetText>
+                                    Current bet: {currentBet}
+                                </BetText>
+                            </Balance>
+                        </BalanceContainer>
+
                         <HandsContainer>
                             <CroupierHandContainer>
                                 {
-                                    croupierHand.length > 0 ? (<CroupierHand currentHand={croupierHand}/>) : (<></>)
+                                    croupierHand.length > 0 ? (<CroupierHand currentHand={croupierHand} isReversed={reverseCroupierCard}/>) : (<></>)
                                 }
                             </CroupierHandContainer>
                             <PointsContainer>
@@ -161,13 +339,20 @@ function Game(loadSavedGame) {
                                 croupierPoints +'/'+ croupierOptionalPoints}
                                 </PointsValue>
                             </PointsContainer>
+                            <Message>{message}</Message>
+                            {
+                                showBetButton && <DivButton onClick={() => startRound()}>Start round</DivButton>
+                            }
                             <ActionButtonContainer>
-                                <DivButton smallMargin={true} isEnabled={enableDrawingCardsForPlayer} onClick={() => {
-                                    enableDrawingCardsForPlayer === true && draw(true, drawOneCardLink)
+                                <DivButton smallMargin={true} isEnabled={enableHitButton} onClick={() => {
+                                    enableHitButton && draw(true, drawOneCardLink)
                                 }}>Hit</DivButton>
-                                <DivButton smallMargin={true}>Stand</DivButton>
-                                <DivButton smallMargin={true}>Double</DivButton>
-                                <DivButton smallMargin={true}>Bet</DivButton>
+                                <DivButton smallMargin={true} isEnabled={enableStandButton} onClick={() => {
+                                    enableStandButton && stand()
+                                }}>Stand</DivButton>
+                                <DivButton smallMargin={true} isEnabled={enableDoubleButton}  onClick={() => {
+                                    enableDoubleButton && double()
+                                }}>Double</DivButton>
                             </ActionButtonContainer>
                             <PointsContainer>
                                 <PointsValue>
@@ -183,11 +368,14 @@ function Game(loadSavedGame) {
                                 }
                             </UserHandContainer>
                         </HandsContainer>
+                        <OptionsContainer>
+                            <DivButton>Save progress</DivButton>
+                        </OptionsContainer>
                     </>
                 ) 
                 : (<Spinner/>)
             }
-        </>
+        </GameScreenContainer>
     )
 }
 

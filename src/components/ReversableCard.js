@@ -1,4 +1,4 @@
-import React,{useState} from 'react';
+import React,{useState, useEffect} from 'react';
 import styled from 'styled-components';
 import cardBackground from '../assets/cardBack.png';
 
@@ -43,15 +43,15 @@ const Revers = styled.div`
     border-radius: 5px;
 `
 
-function ReversableCard(aversImage) {
-    const [reversed, setReversed] = useState(false);
+function ReversableCard({aversImage, isReversed}) {
+    useEffect(() => {
+        console.log("jestem w revers, ", isReversed);
+    }, [isReversed])
 
     return (
-        <CardContainer onClick={() => setReversed((prevValue) => {
-            return !prevValue; 
-        })}>
-            <Card reversed={reversed}>
-                <Avers aversImage={aversImage.aversImage}/>
+        <CardContainer>
+            <Card reversed={!isReversed}>
+                <Avers aversImage={aversImage}/>
                 <Revers/>
             </Card>
         </CardContainer>
