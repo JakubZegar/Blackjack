@@ -5,8 +5,8 @@ function PlayerHand(currentHand) {
     return (
         <>
             {
-                currentHand.currentHand.map((card) => (
-                    <Card aversImage={card.image}/>
+                currentHand.currentHand.map((card, index) => (
+                    <Card key={index} aversImage={card.image}/>
                 ))
             }
         </>

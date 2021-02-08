@@ -18,8 +18,8 @@ function CroupierHand({currentHand, isReversed}) {
                         <ReversableCard aversImage={currentHand[1].image} isReversed={isReversed}/>
                     </>
                 ) : (
-                    currentHand.map((card) => (
-                        <Card aversImage={card.image}/>
+                    currentHand.map((card, index) => (
+                        <Card key={index} aversImage={card.image}/>
                     ))
                 )
             }

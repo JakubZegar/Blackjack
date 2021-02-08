@@ -74,22 +74,23 @@ export const BalanceContainer = styled.div`
 
 export const Balance = styled.div`
     background-color: ${colors.buttonHover};
-    border-radius:50%;
-    padding: 24px;
     align-items:center;
     justify-content:center;
     border: 8px solid black;
     width: 120px;
     margin: 3px 0 3px 0;
+    border-radius: 25px;
 `
 
 export const BalanceText = styled.h4`
     color:white;
+    margin: 12px 0 12px 0;
     text-align:center;
 `
 
 export const BetText = styled.h5`
     color:white;
+    margin: 12px 0 12px 0;
     text-align:center;
 `
 
@@ -136,3 +137,11 @@ export const HistoryContainer = styled.div`
     justify-content:center;
 `
 
+export const Placeholder = styled.div`
+    width: 100px;
+    height: 140px;
+    background-color: rgba(0,0,0,0);
+    background-size:cover;
+    background-position:center;
+    margin: 0 6px;
+`

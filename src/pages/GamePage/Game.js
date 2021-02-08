@@ -1,11 +1,12 @@
 import React,{useState, useEffect} from 'react'
 import Spinner from '../../components/Spinner'
 import {mainLink, newDeckShuffledLink, drawOneCardLink, drawTwoCardsLink, decksCount, reshuffleDeckLink} from '../../assets/const'
-import { ActionButtonContainer, Balance, BalanceContainer, Message, BalanceText,BetCoin,BetConiText,BetText, CroupierHandContainer,GameScreenContainer, HandsContainer, OptionsContainer, PointsContainer, PointsValue, UserHandContainer, HistoryContainer } from './GameElements';
+import { ActionButtonContainer, Balance, BalanceContainer, Message, BalanceText,BetCoin,BetConiText,BetText, CroupierHandContainer,GameScreenContainer, HandsContainer, OptionsContainer, PointsContainer, PointsValue, UserHandContainer, HistoryContainer, Placeholder } from './GameElements';
 import CroupierHand from './CroupierHand';
 import PlayerHand from './PlayerHand';
 import History from './History';
 import { DivButton } from '../../components/Button'
+import { Button } from '../../components/Button'
 
 function Game() {
     const [isDeckLoaded, setIsDeckLoaded] = useState(false);
@@ -42,6 +43,11 @@ function Game() {
 
     const [goingForDouble, setGoingForDouble] = useState(false);
 
+    const [winnerList, setWinnerList] = useState([])
+
+    const [loadingSavedGame, setLoadingSavedGame] = useState(false);
+
+
     let enableHitButton = enableDrawingCardsForPlayer === true && playerRoundEnded === false && placeBet === false;
     let enableStandButton = playerRoundEnded === false && enableDrawingCardsForPlayer === true && placeBet === false;
     let enableDoubleButton = playerHand.length === 2 && playerRoundEnded === false && placeBet === false && playerCurrentBalance >= currentBet;
@@ -53,9 +59,9 @@ function Game() {
         }
     }, [])
 
-    // useEffect(() => {
-
-    // }, [deck])
+    useEffect(() => {
+        console.log(deck.deck_id);
+    }, [deck])
 
     useEffect(() => {
         setPlayerPoints(() => {return 0})
@@ -113,7 +119,7 @@ function Game() {
 
     useEffect(() => {
         
-        if (playerPoints >= 21 && playerOptionalPoints >= 21) {
+        if (playerPoints > 21 && playerOptionalPoints > 21) {
             setEnableDrawingCardsForPlayer(() => {return false})
             setMessage("You lost");
             setTimeout(() => {
@@ -178,16 +184,15 @@ function Game() {
     }, [placeBet])
 
     useEffect(() => {
+        console.log("RUNDA ", roundCounter);
         if ( roundCounter > 5 ) {
             endGame();
-        } else if (roundCounter !== 1) {
+        } else if (roundCounter !== 1 && loadingSavedGame === false) {
             nextRound();
+        } else {
+            setLoadingSavedGame(false);
         }
     }, [roundCounter])
-
-    useEffect(() => {
-        console.log(gameHistory)
-    }, [gameHistory])
 
     const createNewDeck = () => {
         fetch(mainLink + newDeckShuffledLink + decksCount, {
@@ -208,6 +213,8 @@ function Game() {
     }
 
     const draw = (forUser, howManyCards) => {
+        console.log(deck.deck_id);
+
         fetch(mainLink + deck.deck_id + howManyCards, {
             method: 'GET',
             headers: {
@@ -223,6 +230,25 @@ function Game() {
                     setCroupierHand((currentCroupierHand) => { return [...currentCroupierHand, ...responseData.cards]; })
                 }
 
+            })
+            .catch(err => {
+              console.log('error : ' + err);
+            });    
+    }
+
+    const shuffleDeck = (deckId) => {
+        fetch(mainLink + deckId + reshuffleDeckLink, {
+            method: 'GET',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+            },
+          })
+            .then(response => response.json())
+            .then(responseData => {
+                console.log("TASOWANIE", responseData);
+                setIsDeckLoaded(() => { return true; })
+                setDeck( () => { return {...responseData}; })
             })
             .catch(err => {
               console.log('error : ' + err);
@@ -268,6 +294,7 @@ function Game() {
         setGameHistory((history) => {
             return [...history, [playerHand, croupierHand]]
         })
+        setWinnerList((winners) => {return [...winners, "player"]})
         setPlayerCurrentBalance((balance) => {return balance + (currentBet * 1.5)})
         setRoundCounter((round) => {return round + 1});
     }
@@ -276,6 +303,8 @@ function Game() {
         setGameHistory((history) => {
             return [...history, [playerHand, croupierHand]]
         })
+        setWinnerList((winners) => {return [...winners, "computer"]})
+
         setRoundCounter((round) => {return round + 1});
     }
 
@@ -283,6 +312,7 @@ function Game() {
         setGameHistory((history) => {
             return [...history, [playerHand, croupierHand]]
         })
+        setWinnerList((winners) => {return [...winners, "draw"]})
         setPlayerCurrentBalance((balance) => {return balance + currentBet})
         setRoundCounter((round) => {return round + 1});
     }
@@ -304,7 +334,75 @@ function Game() {
     } 
 
     const endGame = () => {
+        setCurrentBet(0)
         setMessage("End of game")
+    }
+
+    const reset = () => {
+        setIsDeckLoaded(false);
+        shuffleDeck(deck.deck_id);
+        nextRound();
+        setRoundCounter(1);
+        setGameHistory([]);
+        setWinnerList([]);
+        setPlayerCurrentBalance(1000);
+    }
+
+    const save = () => {
+
+        localStorage.setItem("savedGame", JSON.stringify(
+            {
+                isDeckLoaded: isDeckLoaded,
+                deck: deck,
+                playerHand: playerHand,
+                croupierHand: croupierHand,
+                gameHistory: gameHistory,
+                playerPoints: playerPoints,
+                croupierPoints: croupierPoints,
+                playerOptionalPoints: playerOptionalPoints,
+                showPlayerOptionalPoints: showPlayerOptionalPoints,
+                croupierOptionalPoints: croupierOptionalPoints,
+                showCroupierOptionalPoints: showCroupierOptionalPoints,
+                enableDrawingCardsForPlayer: enableDrawingCardsForPlayer,
+                playerRoundEnded: playerRoundEnded,
+                playerCurrentBalance: playerCurrentBalance,
+                currentBet: currentBet,
+                reverseCroupierCard: reverseCroupierCard,
+                roundCounter: roundCounter,
+                placeBet: placeBet,
+                message: message,
+                showBetButton: showBetButton,
+                goingForDouble: goingForDouble,
+                winnerList: winnerList
+            }
+        ));
+    }
+
+    const load = () => {
+        setLoadingSavedGame(true);
+        let gameSave = JSON.parse(localStorage.getItem('savedGame'));
+        setDeck(gameSave.deck)
+        setPlayerHand(gameSave.playerHand)
+        setCroupierHand(gameSave.croupierHand)
+        setGameHistory(gameSave.gameHistory)
+        setPlayerPoints(gameSave.playerPoints)
+        setCroupierPoints(gameSave.croupierPoints)
+        setPlayerOptionalPoints(gameSave.playerOptionalPoints)
+        setShowPlayerOptionalPoints(gameSave.showPlayerOptionalPoints)
+        setCroupierOptionalPoints(gameSave.croupierOptionalPoints)
+        setShowCroupierOptionalPoints(gameSave.showCroupierOptionalPoints)
+        setEnableDrawingCardsForPlayer(gameSave.enableDrawingCardsForPlayer)
+        setPlayerRoundEnded(gameSave.playerRoundEnded)
+        setPlayerCurrentBalance(gameSave.playerCurrentBalance)
+        setCurrentBet(gameSave.currentBet)
+        setReverseCroupierCard(gameSave.reverseCroupierCard)
+        setRoundCounter(gameSave.roundCounter)
+        setPlaceBet(gameSave.placeBet)
+        setMessage(gameSave.message)
+        setShowBetButton(gameSave.showBetButton)
+        setGoingForDouble(gameSave.goingForDouble)
+        setWinnerList(gameSave.winnerList)
+        setIsDeckLoaded(gameSave.isDeckLoaded)
     }
 
     return (
@@ -313,6 +411,14 @@ function Game() {
                 isDeckLoaded === true ? (
                     <>
                         <BalanceContainer>
+                            <Button to={'/'}>Main menu</Button>
+
+                            <DivButton isEnabled={true} onClick={() => reset()}>{message === "End of game" ? "New game" : "Reset"}</DivButton>
+
+                            <DivButton isEnabled={message !== "End of game"} onClick={() => save()}>Save</DivButton>
+
+                            <DivButton isEnabled={true} onClick={() => load()}>Load</DivButton>
+
                             <Balance>
                                 <BalanceText>
                                     Balance: {playerCurrentBalance}
@@ -342,7 +448,7 @@ function Game() {
                         <HandsContainer>
                             <CroupierHandContainer>
                                 {
-                                    croupierHand.length > 0 ? (<CroupierHand currentHand={croupierHand} isReversed={reverseCroupierCard}/>) : (<></>)
+                                    croupierHand.length > 0 ? (<CroupierHand currentHand={croupierHand} isReversed={reverseCroupierCard}/>) : (<Placeholder></Placeholder>)
                                 }
                             </CroupierHandContainer>
                             <PointsContainer>
@@ -378,13 +484,13 @@ function Game() {
                             </PointsContainer>
                             <UserHandContainer>
                                 {
-                                    playerHand.length > 0 ? (<PlayerHand currentHand={playerHand}/>) : (<></>)
+                                    playerHand.length > 0 ? (<PlayerHand currentHand={playerHand}/>) : (<Placeholder></Placeholder>)
                                 }
                             </UserHandContainer>
                         </HandsContainer>
                         <OptionsContainer>
                             <HistoryContainer>
-                                <History history={gameHistory}/>
+                                <History history={gameHistory} winners={winnerList}/>
                             </HistoryContainer>
 
                             {/* <DivButton>Save progress</DivButton> */}

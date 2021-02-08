@@ -2,18 +2,18 @@ import React from 'react'
 import { SmallCard } from '../../components/Card'
 import { HistoryLabel, PlayerHandSmall, CroupierHandSmall, Round, SmallHandLabel, RoundLabel } from './HistoryElements'
 
-function History({history}) {
+function History({history, winners}) {
     return (
         <>
             <HistoryLabel>Game history</HistoryLabel>
             {
                 history.map((round, index) =>{
                     return <Round>
-                        <RoundLabel>Round {index + 1}</RoundLabel>
+                        <RoundLabel>Round {index + 1}: Winner - {winners[index]}</RoundLabel>
                         <PlayerHandSmall>
                             {
-                                round[0].map((card) => {
-                                    return <SmallCard aversImage={card.image} />
+                                round[0].map((card, index) => {
+                                    return <SmallCard key={index} aversImage={card.image} />
                                 })
                             }
                             <SmallHandLabel>P</SmallHandLabel>
@@ -21,8 +21,8 @@ function History({history}) {
 
                         <CroupierHandSmall>
                             {
-                                round[1].map((card) => {
-                                    return <SmallCard aversImage={card.image} />
+                                round[1].map((card, index) => {
+                                    return <SmallCard key={index} aversImage={card.image} />
                                 })
                             }
                             <SmallHandLabel>C</SmallHandLabel>
