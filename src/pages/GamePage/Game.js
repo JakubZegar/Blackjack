@@ -1,7 +1,7 @@
 import React,{useState, useEffect} from 'react'
 import Spinner from '../../components/Spinner'
 import {mainLink, newDeckShuffledLink, drawOneCardLink, drawTwoCardsLink, decksCount, reshuffleDeckLink} from '../../assets/const'
-import { ActionButtonContainer, Balance, BalanceContainer, Message, BalanceText,BetCoin,BetConiText,BetText, CroupierHandContainer,GameScreenContainer, HandsContainer, OptionsContainer, PointsContainer, PointsValue, UserHandContainer, HistoryContainer, Placeholder } from './GameElements';
+import { ActionButtonContainer, Balance, BalanceContainer, Message, BalanceText,BetCoin,BetConiText,BetText, CroupierHandContainer,GameScreenContainer, HandsContainer, OptionsContainer, PointsContainer, PointsValue, UserHandContainer, HistoryContainer, Placeholder, SubmitResultContainer, SubmitText, SubmitInput } from './GameElements';
 import CroupierHand from './CroupierHand';
 import PlayerHand from './PlayerHand';
 import History from './History';
@@ -46,7 +46,9 @@ function Game() {
     const [winnerList, setWinnerList] = useState([])
 
     const [loadingSavedGame, setLoadingSavedGame] = useState(false);
-
+//------------------------------------------------------------------------
+    const [gameEnded, setGameEnded] = useState(false);
+    const [bestResults, setBestResults] = useState([]);
 
     let enableHitButton = enableDrawingCardsForPlayer === true && playerRoundEnded === false && placeBet === false;
     let enableStandButton = playerRoundEnded === false && enableDrawingCardsForPlayer === true && placeBet === false;
@@ -54,8 +56,19 @@ function Game() {
 
     useEffect(() => {
         createNewDeck();
+        window.addEventListener('beforeunload', (ev) => 
+        {  
+            save()
+            ev.preventDefault();
+            return ev.returnValue = 'Are you sure you want to close?';
+        })
         return () => {
-            //Save current progress
+          window.removeEventListener('beforeunload', (ev) => 
+          {  
+            save()
+            ev.preventDefault();
+            return ev.returnValue = 'Are you sure you want to close?';
+          })
         }
     }, [])
 
@@ -304,7 +317,6 @@ function Game() {
             return [...history, [playerHand, croupierHand]]
         })
         setWinnerList((winners) => {return [...winners, "computer"]})
-
         setRoundCounter((round) => {return round + 1});
     }
 
@@ -334,11 +346,32 @@ function Game() {
     } 
 
     const endGame = () => {
-        setCurrentBet(0)
-        setMessage("End of game")
+        setGameEnded(true);
+        setCurrentBet(0);
+        setMessage("End of game");
+        let rank = JSON.parse(localStorage.getItem("rank"));
+
+        if( rank === undefined) {
+            localStorage.setItem("rank", JSON.stringify({
+                points: [playerCurrentBalance]
+            }))
+        } else {
+            let sortedRank = rank.points.sort(function(a, b) {
+                return b - a;
+              })
+            if (sortedRank.length<=2) {
+                setBestResults([...sortedRank])
+            } else {
+                setBestResults([sortedRank[0],sortedRank[1],sortedRank[2]])
+            }
+            localStorage.setItem("rank", JSON.stringify({
+                points: [...rank.points, playerCurrentBalance]
+            }))
+        }
     }
 
     const reset = () => {
+        setGameEnded(false);
         setIsDeckLoaded(false);
         shuffleDeck(deck.deck_id);
         nextRound();
@@ -349,7 +382,6 @@ function Game() {
     }
 
     const save = () => {
-
         localStorage.setItem("savedGame", JSON.stringify(
             {
                 isDeckLoaded: isDeckLoaded,
@@ -381,28 +413,29 @@ function Game() {
     const load = () => {
         setLoadingSavedGame(true);
         let gameSave = JSON.parse(localStorage.getItem('savedGame'));
-        setDeck(gameSave.deck)
-        setPlayerHand(gameSave.playerHand)
-        setCroupierHand(gameSave.croupierHand)
-        setGameHistory(gameSave.gameHistory)
-        setPlayerPoints(gameSave.playerPoints)
-        setCroupierPoints(gameSave.croupierPoints)
-        setPlayerOptionalPoints(gameSave.playerOptionalPoints)
-        setShowPlayerOptionalPoints(gameSave.showPlayerOptionalPoints)
-        setCroupierOptionalPoints(gameSave.croupierOptionalPoints)
-        setShowCroupierOptionalPoints(gameSave.showCroupierOptionalPoints)
-        setEnableDrawingCardsForPlayer(gameSave.enableDrawingCardsForPlayer)
-        setPlayerRoundEnded(gameSave.playerRoundEnded)
-        setPlayerCurrentBalance(gameSave.playerCurrentBalance)
-        setCurrentBet(gameSave.currentBet)
-        setReverseCroupierCard(gameSave.reverseCroupierCard)
-        setRoundCounter(gameSave.roundCounter)
-        setPlaceBet(gameSave.placeBet)
-        setMessage(gameSave.message)
-        setShowBetButton(gameSave.showBetButton)
-        setGoingForDouble(gameSave.goingForDouble)
-        setWinnerList(gameSave.winnerList)
-        setIsDeckLoaded(gameSave.isDeckLoaded)
+        console.log(gameSave);
+        setDeck(gameSave.deck);
+        setPlayerHand(gameSave.playerHand);
+        setCroupierHand(gameSave.croupierHand);
+        setGameHistory(gameSave.gameHistory);
+        setPlayerPoints(gameSave.playerPoints);
+        setCroupierPoints(gameSave.croupierPoints);
+        setPlayerOptionalPoints(gameSave.playerOptionalPoints);
+        setShowPlayerOptionalPoints(gameSave.showPlayerOptionalPoints);
+        setCroupierOptionalPoints(gameSave.croupierOptionalPoints);
+        setShowCroupierOptionalPoints(gameSave.showCroupierOptionalPoints);
+        setEnableDrawingCardsForPlayer(gameSave.enableDrawingCardsForPlayer);
+        setPlayerRoundEnded(gameSave.playerRoundEnded);
+        setPlayerCurrentBalance(gameSave.playerCurrentBalance);
+        setCurrentBet(gameSave.currentBet);
+        setReverseCroupierCard(gameSave.reverseCroupierCard);
+        setRoundCounter(gameSave.roundCounter);
+        setPlaceBet(gameSave.placeBet);
+        setMessage(gameSave.message);
+        setShowBetButton(gameSave.showBetButton);
+        setGoingForDouble(gameSave.goingForDouble);
+        setWinnerList(gameSave.winnerList);
+        setIsDeckLoaded(gameSave.isDeckLoaded);
     }
 
     return (
@@ -417,7 +450,7 @@ function Game() {
 
                             <DivButton isEnabled={message !== "End of game"} onClick={() => save()}>Save</DivButton>
 
-                            <DivButton isEnabled={true} onClick={() => load()}>Load</DivButton>
+                            <DivButton isEnabled={enableHitButton || placeBet || gameEnded } onClick={() => (enableHitButton || placeBet || gameEnded) && load()}>Load</DivButton>
 
                             <Balance>
                                 <BalanceText>
@@ -461,7 +494,19 @@ function Game() {
                             </PointsContainer>
                             <Message>{message}</Message>
                             {
-                                showBetButton && <DivButton onClick={() => startRound()}>Start round</DivButton>
+                                gameEnded === true && 
+                                <SubmitResultContainer>
+                                    <SubmitText>Best results:</SubmitText>
+                                    {
+                                        bestResults.map((res, index) => {
+                                            return <SubmitText key={index} >{index+1}. {res} </SubmitText>
+                                        })
+                                    }
+                                </SubmitResultContainer>
+                            }
+
+                            {
+                                showBetButton && <DivButton isEnabled={true} onClick={() => startRound()}>Start round</DivButton>
                             }
                             <ActionButtonContainer>
                                 <DivButton smallMargin={true} isEnabled={enableHitButton} onClick={() => {
@@ -492,8 +537,6 @@ function Game() {
                             <HistoryContainer>
                                 <History history={gameHistory} winners={winnerList}/>
                             </HistoryContainer>
-
-                            {/* <DivButton>Save progress</DivButton> */}
                         </OptionsContainer>
                     </>
                 ) 
@@ -503,4 +546,4 @@ function Game() {
     )
 }
 
-export default Game
+export default Game;

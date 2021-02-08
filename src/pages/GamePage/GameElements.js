@@ -145,3 +145,16 @@ export const Placeholder = styled.div`
     background-position:center;
     margin: 0 6px;
 `
+
+export const SubmitResultContainer = styled.div`
+    display:flex;
+    background-color: ${colors.buttonHover};
+    padding: 12px;
+    border: 5px solid black; 
+    border-radius: 12px;
+`
+
+export const SubmitText = styled.h4`
+    margin: 2px;
+    color:white;
+`
