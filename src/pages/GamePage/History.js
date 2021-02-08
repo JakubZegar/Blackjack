@@ -8,7 +8,7 @@ function History({history, winners}) {
             <HistoryLabel>Game history</HistoryLabel>
             {
                 history.map((round, index) =>{
-                    return <Round>
+                    return <Round key={index}>
                         <RoundLabel>Round {index + 1}: Winner - {winners[index]}</RoundLabel>
                         <PlayerHandSmall>
                             {

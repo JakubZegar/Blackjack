@@ -13,10 +13,6 @@ function Rank() {
           }))
     }, [rank])
 
-    useEffect(() => {
-        console.log(sortedRank);
-    }, [sortedRank])
-
     return (
         <>
             <BackButtonContainer>

@@ -1,4 +1,4 @@
-import React,{useState, useEffect} from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import cardBackground from '../assets/cardBack.png';
 
@@ -44,10 +44,6 @@ const Revers = styled.div`
 `
 
 function ReversableCard({aversImage, isReversed}) {
-    useEffect(() => {
-        console.log("jestem w revers, ", isReversed);
-    }, [isReversed])
-
     return (
         <CardContainer>
             <Card reversed={!isReversed}>

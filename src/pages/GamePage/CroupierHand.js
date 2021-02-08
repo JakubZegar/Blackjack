@@ -1,13 +1,8 @@
-import React,{useState, useEffect} from 'react'
+import React from 'react'
 import {Card} from '../../components/Card';
 import ReversableCard from '../../components/ReversableCard';
 
 function CroupierHand({currentHand, isReversed}) {
-
-    useEffect(() => {
-        console.log("Przekazana ręka: ", currentHand);
-        console.log("długość: ", isReversed);
-    }, [currentHand])
 
     return (
         <>

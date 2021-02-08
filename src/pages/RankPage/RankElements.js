@@ -1,6 +1,4 @@
 import styled from 'styled-components';
-import {colors} from '../../assets/colors'
-
 
 export const RankListContainer = styled.div`
     display: flex;

@@ -1,7 +1,7 @@
 import React,{useState, useEffect} from 'react'
 import Spinner from '../../components/Spinner'
 import {mainLink, newDeckShuffledLink, drawOneCardLink, drawTwoCardsLink, decksCount, reshuffleDeckLink} from '../../assets/const'
-import { ActionButtonContainer, Balance, BalanceContainer, Message, BalanceText,BetCoin,BetConiText,BetText, CroupierHandContainer,GameScreenContainer, HandsContainer, OptionsContainer, PointsContainer, PointsValue, UserHandContainer, HistoryContainer, Placeholder, SubmitResultContainer, SubmitText, SubmitInput } from './GameElements';
+import { ActionButtonContainer, Balance, BalanceContainer, Message, BalanceText,BetCoin,BetConiText,BetText, CroupierHandContainer,GameScreenContainer, HandsContainer, OptionsContainer, PointsContainer, PointsValue, UserHandContainer, HistoryContainer, Placeholder, SubmitResultContainer, SubmitText } from './GameElements';
 import CroupierHand from './CroupierHand';
 import PlayerHand from './PlayerHand';
 import History from './History';
@@ -46,7 +46,7 @@ function Game() {
     const [winnerList, setWinnerList] = useState([])
 
     const [loadingSavedGame, setLoadingSavedGame] = useState(false);
-//------------------------------------------------------------------------
+
     const [gameEnded, setGameEnded] = useState(false);
     const [bestResults, setBestResults] = useState([]);
 
@@ -71,10 +71,6 @@ function Game() {
           })
         }
     }, [])
-
-    useEffect(() => {
-        console.log(deck.deck_id);
-    }, [deck])
 
     useEffect(() => {
         setPlayerPoints(() => {return 0})
@@ -197,7 +193,6 @@ function Game() {
     }, [placeBet])
 
     useEffect(() => {
-        console.log("RUNDA ", roundCounter);
         if ( roundCounter > 5 ) {
             endGame();
         } else if (roundCounter !== 1 && loadingSavedGame === false) {
@@ -226,8 +221,6 @@ function Game() {
     }
 
     const draw = (forUser, howManyCards) => {
-        console.log(deck.deck_id);
-
         fetch(mainLink + deck.deck_id + howManyCards, {
             method: 'GET',
             headers: {
@@ -259,7 +252,6 @@ function Game() {
           })
             .then(response => response.json())
             .then(responseData => {
-                console.log("TASOWANIE", responseData);
                 setIsDeckLoaded(() => { return true; })
                 setDeck( () => { return {...responseData}; })
             })
@@ -413,29 +405,30 @@ function Game() {
     const load = () => {
         setLoadingSavedGame(true);
         let gameSave = JSON.parse(localStorage.getItem('savedGame'));
-        console.log(gameSave);
-        setDeck(gameSave.deck);
-        setPlayerHand(gameSave.playerHand);
-        setCroupierHand(gameSave.croupierHand);
-        setGameHistory(gameSave.gameHistory);
-        setPlayerPoints(gameSave.playerPoints);
-        setCroupierPoints(gameSave.croupierPoints);
-        setPlayerOptionalPoints(gameSave.playerOptionalPoints);
-        setShowPlayerOptionalPoints(gameSave.showPlayerOptionalPoints);
-        setCroupierOptionalPoints(gameSave.croupierOptionalPoints);
-        setShowCroupierOptionalPoints(gameSave.showCroupierOptionalPoints);
-        setEnableDrawingCardsForPlayer(gameSave.enableDrawingCardsForPlayer);
-        setPlayerRoundEnded(gameSave.playerRoundEnded);
-        setPlayerCurrentBalance(gameSave.playerCurrentBalance);
-        setCurrentBet(gameSave.currentBet);
-        setReverseCroupierCard(gameSave.reverseCroupierCard);
-        setRoundCounter(gameSave.roundCounter);
-        setPlaceBet(gameSave.placeBet);
-        setMessage(gameSave.message);
-        setShowBetButton(gameSave.showBetButton);
-        setGoingForDouble(gameSave.goingForDouble);
-        setWinnerList(gameSave.winnerList);
-        setIsDeckLoaded(gameSave.isDeckLoaded);
+        if (gameSave !== undefined) {
+            setDeck(gameSave.deck);
+            setPlayerHand(gameSave.playerHand);
+            setCroupierHand(gameSave.croupierHand);
+            setGameHistory(gameSave.gameHistory);
+            setPlayerPoints(gameSave.playerPoints);
+            setCroupierPoints(gameSave.croupierPoints);
+            setPlayerOptionalPoints(gameSave.playerOptionalPoints);
+            setShowPlayerOptionalPoints(gameSave.showPlayerOptionalPoints);
+            setCroupierOptionalPoints(gameSave.croupierOptionalPoints);
+            setShowCroupierOptionalPoints(gameSave.showCroupierOptionalPoints);
+            setEnableDrawingCardsForPlayer(gameSave.enableDrawingCardsForPlayer);
+            setPlayerRoundEnded(gameSave.playerRoundEnded);
+            setPlayerCurrentBalance(gameSave.playerCurrentBalance);
+            setCurrentBet(gameSave.currentBet);
+            setReverseCroupierCard(gameSave.reverseCroupierCard);
+            setRoundCounter(gameSave.roundCounter);
+            setPlaceBet(gameSave.placeBet);
+            setMessage(gameSave.message);
+            setShowBetButton(gameSave.showBetButton);
+            setGoingForDouble(gameSave.goingForDouble);
+            setWinnerList(gameSave.winnerList);
+            setIsDeckLoaded(gameSave.isDeckLoaded);
+        }
     }
 
     return (
