@@ -1,3 +1,53 @@
+# Blackjack game made in React
+
+### Required dependencies:
+testing-library/jest-dom: ^5.11.4,
+testing-library/react: ^11.1.0,
+testing-library/user-event": ^12.1.10,
+react: ^17.0.1,
+react-dom: ^17.0.1,
+react-router-dom: ^5.2.0,
+react-scripts": 4.0.2,
+styled-components: ^5.2.1,
+web-vitals: ^1.0.1
+
+### ...or you can just run nmp install
+
+![Game](https://i.imgur.com/klf6TeK.png)
+
+## How to play?
+To start playing, click on play button. Game lasts 5 rounds.
+![mainmenu](https://i.imgur.com/lsMMrtH.png)
+
+Then choose how much you want to bet using buttons on the left. Your startnig balance is always 1000. You can bet 0, if you want. Then click Start Round button.
+![balance](https://i.imgur.com/eZ25msO.png)
+
+Here is your hand, and actions you can do. Hit means you are drawing card, Stand means you checking computers hand, Double means you are doubling your bet and drawing only one hand.
+![userhand](https://i.imgur.com/Ykuv1Xe.png)
+
+You can't always perform all three actions. When button on hover is gray, then you are forbidden to do this now.
+![disabled](https://i.imgur.com/UXGA0lQ.png)
+
+If the button on hover is red, then you can easili do certain action.
+![enabled](https://i.imgur.com/uAmjBzs.png)
+
+Here is opponents hand. One card is visible, one is hidden. Whenever you Stand or draw 21, computer will start playing his turn. Then results will be compared, and right amount of money will be added to your balance. 
+![comphand](https://i.imgur.com/XvSc2OA.png)
+
+After each round hands and results will be shown in the right panel.
+![history](https://i.imgur.com/OpPOgEv.png)
+
+You can always save your current game, reset game, go back to main menu or load saved game.
+![menubar](https://i.imgur.com/oFwkEE8.png)
+
+When game ends, top3 resulst of all time is shown.
+![endres](https://i.imgur.com/9OM4Tdc.png)
+
+You can chceck full rank in main menu, by clicking High Scores
+![rank](https://i.imgur.com/E7YbBOf.png)
+
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
